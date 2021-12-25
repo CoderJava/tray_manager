@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TrayListener {
   String _iconType = _kIconTypeOriginal;
+  var _counter = 0;
 
   Timer? _timer;
 
@@ -32,25 +33,41 @@ class _HomePageState extends State<HomePage> with TrayListener {
     super.dispose();
   }
 
-  void _handleSetIcon(String iconType) async {
+  void _handleSetIcon(String iconType, String title) async {
     _iconType = iconType;
-    String iconPath =
-        Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
+    String iconPath = Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
 
     if (_iconType == 'original') {
-      iconPath = Platform.isWindows
-          ? 'images/tray_icon_original.ico'
-          : 'images/tray_icon_original.png';
+      iconPath = Platform.isWindows ? 'images/tray_icon_original.ico' : 'images/tray_icon_original.png';
     }
 
-    await TrayManager.instance.setIcon(iconPath);
+    await TrayManager.instance.setIcon(iconPath, title: title);
   }
 
   void _startIconFlashing() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      _handleSetIcon(_iconType == _kIconTypeOriginal
-          ? _kIconTypeDefault
-          : _kIconTypeOriginal);
+      _counter += 1;
+      var tempCounter = _counter;
+      var hour = 0;
+      var minute = 0;
+      var second = 0;
+      if (tempCounter >= 3600) {
+        hour = tempCounter ~/ 3600;
+        tempCounter = tempCounter % 3600;
+      }
+      if (tempCounter >= 60) {
+        minute = tempCounter ~/ 60;
+        tempCounter = tempCounter % 60;
+      }
+      second = tempCounter;
+      final strHour = hour.toString().padLeft(2, '0');
+      final strMinute = minute.toString().padLeft(2, '0');
+      final strSecond = second.toString().padLeft(2, '0');
+      final title = '$strHour:$strMinute:$strSecond';
+      _handleSetIcon(
+        _iconType == _kIconTypeOriginal ? _kIconTypeDefault : _kIconTypeOriginal,
+        title,
+      );
     });
     setState(() {});
   }
@@ -80,23 +97,21 @@ class _HomePageState extends State<HomePage> with TrayListener {
                   Builder(builder: (_) {
                     bool isFlashing = (_timer != null && _timer!.isActive);
                     return CupertinoButton(
-                      child:
-                          isFlashing ? Text('stop flash') : Text('start flash'),
-                      onPressed:
-                          isFlashing ? _stopIconFlashing : _startIconFlashing,
+                      child: isFlashing ? Text('stop flash') : Text('start flash'),
+                      onPressed: isFlashing ? _stopIconFlashing : _startIconFlashing,
                     );
                   }),
-                  CupertinoButton(
+                  /*CupertinoButton(
                     child: Text('Default'),
                     onPressed: () => _handleSetIcon(_kIconTypeDefault),
                   ),
                   CupertinoButton(
                     child: Text('Original'),
                     onPressed: () => _handleSetIcon(_kIconTypeOriginal),
-                  ),
+                  ),*/
                 ],
               ),
-              onTap: () => _handleSetIcon(_kIconTypeDefault),
+              // onTap: () => _handleSetIcon(_kIconTypeDefault),
             ),
             // PreferenceListItem(
             //   title: Text('setToolTip'),

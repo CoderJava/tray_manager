@@ -91,6 +91,7 @@ class TrayManager {
   Future<void> setIcon(
     String iconPath, {
     bool isTemplate = false, // macOS only
+    String title = '', // macOS only
   }) async {
     ByteData imageData = await rootBundle.load(iconPath);
     String base64Icon = base64Encode(imageData.buffer.asUint8List());
@@ -103,6 +104,7 @@ class TrayManager {
         iconPath,
       ]),
       'base64Icon': base64Icon,
+      'title': title,
       'isTemplate': isTemplate,
     };
     await _channel.invokeMethod('setIcon', arguments);
@@ -134,8 +136,7 @@ class TrayManager {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
     };
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getBounds', arguments);
+    final Map<dynamic, dynamic> resultData = await _channel.invokeMethod('getBounds', arguments);
     return Rect.fromLTWH(
       resultData['x'],
       resultData['y'],

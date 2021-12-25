@@ -62,7 +62,7 @@ public class TrayManagerPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
     }
     
     private func _init() {
-        statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
+        statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.action = #selector(self.statusItemButtonClicked(sender:))
             button.sendAction(on: [.leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp])
@@ -167,6 +167,7 @@ public class TrayManagerPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
         
         let args:[String: Any] = call.arguments as! [String: Any]
         let base64Icon: String =  args["base64Icon"] as! String;
+        let title: String = args["title"] as! String;
         let isTemplate: Bool =  args["isTemplate"] as! Bool;
         
         let imageData = Data(base64Encoded: base64Icon, options: .ignoreUnknownCharacters)
@@ -175,7 +176,9 @@ public class TrayManagerPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
         image!.isTemplate = isTemplate
         
         if let button = statusItem.button {
+            button.title = title
             button.image = image
+            button.imagePosition = NSControl.ImagePosition.imageLeft
         }
         
         result(true)
